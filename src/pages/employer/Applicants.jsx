@@ -249,7 +249,7 @@ export default function Applicants() {
 
             <div className="flex flex-wrap gap-2 mt-4">
               <a
-                href={app.resume_link}
+                href={`/resume/${app.firebase_uid}`}
                 target="_blank"
                 rel="noreferrer"
                 className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
