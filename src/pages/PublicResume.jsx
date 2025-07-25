@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // ⬅️ Added useNavigate
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+
 import supabase from "../supabaseClient";
 
 export default function PublicResume() {
   const { userId } = useParams();
-  const navigate = useNavigate(); // ⬅️ Added this
+  const navigate = useNavigate();
   const [resume, setResume] = useState(null);
   const [loading, setLoading] = useState(true);
 

@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import supabase from "../../supabaseClient";
 
 export default function ManageUsers() {
   const [users, setUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchUsers();
