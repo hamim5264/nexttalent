@@ -19,6 +19,7 @@ export default function UserDashboard() {
   const user = auth.currentUser;
   const navigate = useNavigate();
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [appliedJobsCount, setAppliedJobsCount] = useState(0);
   const [approvedJobsCount, setApprovedJobsCount] = useState(0);
   const [interviewCount, setInterviewCount] = useState(0);
@@ -159,23 +160,38 @@ export default function UserDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-yellow-300 via-white to-yellow-200 bg-opacity-60 backdrop-blur-sm">
+      <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-yellow-400"></div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-[#FFFAEC]">
-      <div className="sticky top-0 h-screen">
+    <div className="flex min-h-screen bg-[#FFFAEC] relative">
+      <div className="hidden md:block sticky top-0 h-screen">
         <UserSidebar />
       </div>
+
+      {isSidebarOpen && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50">
+          <div className="absolute left-0 top-0 w-64 h-full bg-white shadow-lg z-50">
+            <UserSidebar />
+            <button
+              className="absolute top-2 right-2 text-red-500 text-xl"
+              onClick={() => setIsSidebarOpen(false)}
+            >
+              &times;
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col flex-1 overflow-y-auto">
-        <UserHeader />
+        <UserHeader onMenuClick={() => setIsSidebarOpen(true)} />
 
         <main className="p-6 flex-1 space-y-10">
-          <h1 className="text-4xl font-bold text-center text-[#333333]">
-            🚀 Get the Right Job You Deserve
+          <h1 className="text-2xl md:text-3xl font-bold text-center mb-6 bg-gradient-to-r from-yellow-500 via-orange-500 to-pink-500 bg-clip-text text-transparent animate-pulse">
+            Get The Right Job You Deserve
           </h1>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -288,7 +304,6 @@ export default function UserDashboard() {
     </div>
   );
 }
-
 function CounterCard({ title, value }) {
   return (
     <div className="bg-white p-4 rounded shadow text-center border-2 border-neon hover:scale-105 transition">

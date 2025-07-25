@@ -30,7 +30,7 @@ export default function EmployerSidebar() {
   };
 
   return (
-    <div className="w-64 h-full bg-gradient-to-b from-yellow-300 via-white to-yellow-200 text-black flex flex-col shadow-xl">
+    <div className="w-full sm:w-64 h-auto sm:h-full bg-gradient-to-b from-yellow-300 via-white to-yellow-200 text-black flex flex-col shadow-xl">
       <div
         onClick={() => navigate("/employer/profile-settings")}
         className="flex flex-col items-center p-4 cursor-pointer hover:opacity-80 transition"
@@ -43,72 +43,39 @@ export default function EmployerSidebar() {
           alt="Employer Logo"
           className="w-20 h-20 rounded-full object-cover border-2 border-white shadow"
         />
-        <h2 className="mt-2 text-lg tracking-widest font-bold text-center">
+        <h2 className="mt-2 text-base sm:text-lg tracking-widest font-bold text-center">
           {employer?.company_name || "Update"}
         </h2>
       </div>
 
-      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-        <Link
-          to="/employer"
-          className="block px-4 py-2 rounded hover:bg-white hover:shadow"
-        >
-          Dashboard
-        </Link>
-        <Link
-          to="/employer/post-job"
-          className="block px-4 py-2 rounded hover:bg-white hover:shadow"
-        >
-          Post New Job
-        </Link>
-        <Link
-          to="/employer/posted-jobs"
-          className="block px-4 py-2 rounded hover:bg-white hover:shadow"
-        >
-          Posted Jobs
-        </Link>
-        <Link
-          to="/employer/manage-jobs"
-          className="block px-4 py-2 rounded hover:bg-white hover:shadow"
-        >
-          Manage Jobs
-        </Link>
-        <Link
-          to="/employer/interview-schedules"
-          className="block px-4 py-2 rounded hover:bg-white hover:shadow"
-        >
-          Interview Schedules
-        </Link>
-        <Link
-          to="/employer/applicants"
-          className="block px-4 py-2 rounded hover:bg-white hover:shadow"
-        >
-          Applicants
-        </Link>
-        <Link
-          to="/employer/profile-settings"
-          className="block px-4 py-2 rounded hover:bg-white hover:shadow"
-        >
-          Profile Settings
-        </Link>
-        <Link
-          to="/employer/review"
-          className="block px-4 py-2 rounded hover:bg-white hover:shadow"
-        >
-          Review
-        </Link>
-        <Link
-          to="/employer/about-us"
-          className="block px-4 py-2 rounded hover:bg-white hover:shadow"
-        >
-          About Us
-        </Link>
-        <Link
-          to="/employer/support-privacy"
-          className="block px-4 py-2 rounded hover:bg-white hover:shadow"
-        >
-          Support & Privacy
-        </Link>
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto text-sm sm:text-base">
+        {[
+          { path: "/employer", label: "Dashboard" },
+          { path: "/employer/post-job", label: "Post New Job" },
+          { path: "/employer/posted-jobs", label: "Posted Jobs" },
+          { path: "/employer/all-jobs", label: "All Jobs" },
+
+          { path: "/employer/manage-jobs", label: "Manage Jobs" },
+          {
+            path: "/employer/interview-schedules",
+            label: "Interview Schedules",
+          },
+          { path: "/employer/applicants", label: "Applicants" },
+          { path: "/employer/rejected-feedback", label: "Rejected Feedback" },
+
+          { path: "/employer/profile-settings", label: "Profile Settings" },
+          { path: "/employer/review", label: "Review" },
+          { path: "/employer/about-us", label: "About Us" },
+          { path: "/employer/support-privacy", label: "Support & Privacy" },
+        ].map((item) => (
+          <Link
+            key={item.path}
+            to={item.path}
+            className="block px-4 py-2 rounded hover:bg-white hover:shadow text-center sm:text-left"
+          >
+            {item.label}
+          </Link>
+        ))}
       </nav>
     </div>
   );

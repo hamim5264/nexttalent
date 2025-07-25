@@ -102,7 +102,6 @@ export default function SearchJobs() {
         });
       }
     } else {
-      // Save job
       const { error } = await supabase
         .from("user_saved_jobs")
         .insert([{ firebase_uid: user.uid, job_id: jobId }]);
@@ -166,7 +165,7 @@ export default function SearchJobs() {
       } else if (jobData) {
         await notifySpecificUser(
           jobData.firebase_uid,
-          "employer", 
+          "employer",
           "New Job Application",
           `${userProfile?.name || "A user"} applied to your job: ${
             jobData.title
@@ -211,66 +210,106 @@ export default function SearchJobs() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredJobs.map((job) => (
-          <div
-            key={job.id}
-            className="bg-white p-4 rounded shadow-xl hover:shadow-2xl transition relative"
-          >
-            {job.image_url && (
-              <img
-                src={job.image_url}
-                alt={job.title}
-                className="w-full h-32 object-cover rounded mb-2"
-              />
-            )}
-            <h2 className="text-lg font-bold text-[#333333]">{job.title}</h2>
-            <p className="text-[#555555]">{job.description}</p>
-            <p className="text-[#555555]">📍 {job.location}</p>
-            <p className="text-[#555555]">💰 {job.salary}</p>
+        {filteredJobs.map((job) => {
+          const noSkillsProvided =
+            job.required_skills?.[0]?.toLowerCase() ===
+            "no skills provided from company";
+          const deadlineProvided = !!job.application_deadline;
 
-            {job.employer && (
-              <div className="flex items-center justify-between mt-2">
-                <div>
-                  <p className="text-sm text-[#333333]">
-                    Company:{" "}
-                    <span className="font-medium">
-                      {job.employer.company_name}
-                    </span>
-                  </p>
-                  <p className="text-sm text-[#555555]">
-                    Email: {job.employer.email}
-                  </p>
-                </div>
-
-                <div
-                  className="cursor-pointer"
-                  onClick={() => toggleSaveJob(job.id)}
-                >
-                  {savedJobs[job.id] ? (
-                    <HeartFill className="text-[#FFD24C]" size={28} />
-                  ) : (
-                    <Heart className="text-[#333333]" size={28} />
-                  )}
-                </div>
-              </div>
-            )}
-
-            <button
-              onClick={() => handleApply(job)}
-              disabled={appliedJobs[job.id]}
-              className={`w-full mt-3 px-3 py-1 rounded ${
-                appliedJobs[job.id]
-                  ? "bg-gray-400 text-white cursor-not-allowed"
-                  : "bg-[#FFD24C] text-[#333333] hover:bg-[#FFE9B5]"
-              }`}
+          return (
+            <div
+              key={job.id}
+              className="bg-white p-4 rounded shadow-xl hover:shadow-2xl transition relative"
             >
-              {appliedJobs[job.id] ? "Applied" : "Apply Now"}
-            </button>
-          </div>
-        ))}
+              {job.image_url && (
+                <img
+                  src={job.image_url}
+                  alt={job.title}
+                  className="w-full h-32 object-cover rounded mb-2"
+                />
+              )}
+              <h2 className="text-lg font-bold text-[#333333]">{job.title}</h2>
+              <p className="text-[#333333]">
+                <span className="font-bold">Description:</span>{" "}
+                {job.description}
+              </p>
+              <p className="text-[#333333]">
+                <span className="font-bold">Location:</span> {job.location}
+              </p>
+              <p className="text-[#333333]">
+                <span className="font-bold">Salary:</span> {job.salary}
+              </p>
+
+              <p>
+                <span className="font-bold text-[#333333]">Skills:</span>{" "}
+                <span
+                  className={
+                    noSkillsProvided
+                      ? "text-red-500 uppercase"
+                      : "text-[#555555]"
+                  }
+                >
+                  {noSkillsProvided
+                    ? job.required_skills[0]
+                    : job.required_skills.join(", ")}
+                </span>
+              </p>
+
+              <p>
+                <span className="font-bold text-[#333333]">Deadline:</span>{" "}
+                <span
+                  className={
+                    deadlineProvided
+                      ? "text-[#555555]"
+                      : "text-red-600 font-semibold"
+                  }
+                >
+                  {deadlineProvided ? job.application_deadline : "NOT PROVIDED"}
+                </span>
+              </p>
+
+              {job.employer && (
+                <div className="flex items-center justify-between mt-2">
+                  <div>
+                    <p className="text-sm text-[#333333]">
+                      <span className="font-bold">Company:</span>{" "}
+                      {job.employer.company_name}
+                    </p>
+                    <p className="text-sm text-[#333333]">
+                      <span className="font-bold">Email:</span>{" "}
+                      {job.employer.email}
+                    </p>
+                  </div>
+
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => toggleSaveJob(job.id)}
+                  >
+                    {savedJobs[job.id] ? (
+                      <HeartFill className="text-[#FFD24C]" size={28} />
+                    ) : (
+                      <Heart className="text-[#333333]" size={28} />
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <button
+                onClick={() => handleApply(job)}
+                disabled={appliedJobs[job.id]}
+                className={`w-full mt-3 px-3 py-1 rounded ${
+                  appliedJobs[job.id]
+                    ? "bg-gray-400 text-white cursor-not-allowed"
+                    : "bg-[#FFD24C] text-[#333333] hover:bg-[#FFE9B5]"
+                }`}
+              >
+                {appliedJobs[job.id] ? "Applied" : "Apply Now"}
+              </button>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Application Modal */}
       {selectedJob && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded shadow-xl max-w-md w-full text-center space-y-4">

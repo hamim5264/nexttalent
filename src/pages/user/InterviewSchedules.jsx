@@ -79,12 +79,14 @@ export default function InterviewSchedules() {
 
   return (
     <div className="flex min-h-screen bg-[#FFFAEC]">
-      <div className="sticky top-0 h-screen">
+      <div className="hidden md:block sticky top-0 h-screen">
         <UserSidebar />
       </div>
 
       <div className="flex-1 flex flex-col overflow-y-auto">
-        <UserHeader />
+        <div className="hidden md:block">
+          <UserHeader />
+        </div>
 
         <main className="p-6 space-y-4">
           <div className="flex justify-center mt-4 mb-6">

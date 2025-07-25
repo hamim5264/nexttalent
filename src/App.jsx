@@ -15,6 +15,7 @@ import AboutUs from "./pages/AboutUs";
 import SupportPrivacy from "./pages/SupportPrivacy";
 import ReviewScreen from "./pages/ReviewScreen";
 import NotificationsScreen from "./pages/NotificationsScreen";
+import PublicResume from "./pages/PublicResume";
 
 // Admin
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -34,6 +35,8 @@ import Applicants from "./pages/employer/Applicants";
 import ProfileSettings from "./pages/employer/ProfileSettings";
 import PostedJobsScreen from "./pages/employer/PostedJobsScreen";
 import InterviewSchedulesScreen from "./pages/employer/InterviewSchedulesScreen";
+import EmployerAllJobs from "./pages/employer/EmployerAllJobs";
+import RejectedFeedbackScreen from "./pages/employer/RejectedFeedbackScreen";
 
 // User
 import UserDashboard from "./pages/user/UserDashboard";
@@ -44,6 +47,7 @@ import Applications from "./pages/user/Applications";
 import UserSettings from "./pages/user/UserSettings";
 import YourResume from "./pages/user/YourResume";
 import InterviewSchedules from "./pages/user/InterviewSchedules";
+import RejectedSuggestions from "./pages/user/RejectedSuggestions";
 
 export default function App() {
   const [isMaintenance, setIsMaintenance] = useState(false);
@@ -90,6 +94,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/notifications" element={<NotificationsScreen />} />
+          <Route path="/resume/:userId" element={<PublicResume />} />
 
           {/* Admin */}
           <Route path="/admin" element={<AdminDashboard />} />
@@ -124,6 +129,11 @@ export default function App() {
             path="/employer/profile-settings"
             element={<ProfileSettings />}
           />
+          <Route path="/employer/all-jobs" element={<EmployerAllJobs />} />
+          <Route
+            path="/employer/rejected-feedback"
+            element={<RejectedFeedbackScreen />}
+          />
 
           {/* User */}
           <Route path="/user" element={<UserDashboard />} />
@@ -140,6 +150,10 @@ export default function App() {
           <Route path="/user/about-us" element={<AboutUs />} />
           <Route path="/user/support-privacy" element={<SupportPrivacy />} />
           <Route path="/user/review" element={<ReviewScreen />} />
+          <Route
+            path="/user/rejected-suggestions"
+            element={<RejectedSuggestions />}
+          />
 
           {/* Fallback */}
           <Route path="*" element={<LandingPage />} />

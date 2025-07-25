@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import whyImg from "../assets/why.svg";
 
 export default function LandingPage() {
   return (
@@ -42,27 +43,28 @@ export default function LandingPage() {
           </p>
           <Link
             to="/login"
-            className="border-2 border-yellow-400 text-black px-6 py-3 rounded-lg text-lg font-semibold hover:scale-105 transition-transform animate-pulse"
+            className="relative inline-block px-6 py-3 rounded-2xl text-lg font-semibold text-black border-2 border-yellow-400 hover:scale-105 transition-transform overflow-hidden group"
           >
-            Get Started 🚀
+            <span className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-400 animate-pulse rounded-2xl opacity-40 group-hover:opacity-60"></span>
+            <span className="relative z-10">Get Started</span>
           </Link>
         </main>
 
         <section className="bg-white bg-opacity-90 py-12 px-6 text-center">
-          <h3 className="text-3xl font-semibold mb-4">
-            🌟 Why Choose NextTalent?
-          </h3>
-          <p className="max-w-3xl mx-auto text-[#555555] mb-6 text-justify">
-            NextTalent isn't just another job platform — it's a career
-            accelerator. We connect talent with the right opportunities through
-            personalized job matches, skill-building resources, and a seamless
-            application process. Our verified employers ensure safe, authentic
-            openings, and our real-time interview scheduling keeps candidates
-            ahead in their career journey. Whether you're a fresh graduate or a
-            seasoned professional,
-            <span className="font-bold"> NextTalent </span>
-            is designed to help you land the job you deserve — faster, smarter,
-            and better.
+          <img
+            src={whyImg}
+            alt="Hiring Growth"
+            className="mx-auto w-40 h-40 md:w-40 md:h-40 object-contain mb-4"
+          />
+          <h1 className="text-2xl md:text-3xl font-bold text-center mb-6 bg-gradient-to-r from-yellow-500 via-orange-500 to-pink-500 bg-clip-text text-transparent animate-pulse">
+            Why Choose NextTalent?
+          </h1>
+
+          <p className="max-w-2xl mx-auto text-[#555555] mb-6 text-center">
+            <span className="font-bold">NextTalent</span> helps you land the
+            right job faster with personalized matches, verified employers, and
+            real-time interview scheduling. Whether you're starting out or
+            growing your career, we make the hiring journey smarter and easier.
           </p>
         </section>
 

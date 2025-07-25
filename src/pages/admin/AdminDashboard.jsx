@@ -154,13 +154,14 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="flex h-screen">
+    <div className="flex flex-col md:flex-row h-screen">
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <Header />
-        <main className="p-6 bg-[#FFFAEC] flex-1 overflow-auto">
-          <h1 className="text-3xl font-bold text-center mb-6 text-[#333333]">
-            🚀 Empower Your Platform, Admin!
+
+        <main className="p-4 sm:p-6 bg-[#FFFAEC] flex-1 overflow-auto">
+          <h1 className="text-2xl md:text-3xl font-bold text-center mb-6 bg-gradient-to-r from-yellow-500 via-orange-500 to-pink-500 bg-clip-text text-transparent animate-pulse">
+            Empower Your Platform, Admin!
           </h1>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -246,7 +247,7 @@ export default function AdminDashboard() {
                   <img
                     src={job.image_url || "https://via.placeholder.com/300"}
                     alt={job.title}
-                    className="w-full h-40 object-cover rounded mb-2"
+                    className="w-full h-40 sm:h-48 object-cover rounded mb-2"
                   />
                   <h3 className="text-lg font-bold">{job.title}</h3>
                   <p>Company: {job.company_name}</p>
@@ -290,7 +291,8 @@ export default function AdminDashboard() {
 
           <section className="mb-8">
             <h2 className="text-xl font-bold mb-3">User Reviews</h2>
-            <div className="flex space-x-4 overflow-x-auto">
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {reviews.map((rev) => (
                 <div
                   key={rev.id}

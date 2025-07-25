@@ -12,6 +12,7 @@ import {
   Cell,
 } from "recharts";
 import { getAuth } from "firebase/auth";
+import { Menu } from "lucide-react";
 
 export default function EmployerDashboard() {
   const auth = getAuth();
@@ -29,6 +30,8 @@ export default function EmployerDashboard() {
   const [newsFeed, setNewsFeed] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -91,16 +94,61 @@ export default function EmployerDashboard() {
   };
 
   const fetchPostedJobs = async () => {
-    const { data } = await supabase
+    const { data: jobs, error: jobsError } = await supabase
       .from("employer_jobs")
       .select("*")
       .eq("firebase_uid", user.uid);
-    setPostedJobs(data || []);
+
+    if (jobsError) {
+      console.error("Error fetching posted jobs:", jobsError);
+      return;
+    }
+
+    const { data: profile, error: profileError } = await supabase
+      .from("employer_profiles")
+      .select("company_name")
+      .eq("firebase_uid", user.uid)
+      .single();
+
+    const companyName = profile?.company_name || "N/A";
+
+    const jobsWithCompany = jobs.map((job) => ({
+      ...job,
+      company_name: companyName,
+    }));
+
+    setPostedJobs(jobsWithCompany);
   };
 
   const fetchAllJobs = async () => {
-    const { data } = await supabase.from("employer_jobs").select("*");
-    setAllJobs(data || []);
+    const { data: jobs, error } = await supabase
+      .from("employer_jobs")
+      .select("*")
+      .eq("status", "Approved")
+      .order("created_at", { ascending: false })
+      .limit(10);
+
+    if (error) {
+      console.error("Failed to fetch all jobs:", error);
+      return;
+    }
+
+    const uniqueUids = [...new Set(jobs.map((job) => job.firebase_uid))];
+
+    const { data: profiles } = await supabase
+      .from("employer_profiles")
+      .select("firebase_uid, company_name")
+      .in("firebase_uid", uniqueUids);
+
+    const jobWithCompany = jobs.map((job) => {
+      const profile = profiles.find((p) => p.firebase_uid === job.firebase_uid);
+      return {
+        ...job,
+        company_name: profile?.company_name || "N/A",
+      };
+    });
+
+    setAllJobs(jobWithCompany);
   };
 
   const fetchTrendingJobs = async () => {
@@ -108,20 +156,36 @@ export default function EmployerDashboard() {
       .from("user_applied_jobs")
       .select("job_id");
 
-    const jobFrequency = appliedJobs.reduce((acc, curr) => {
-      acc[curr.job_id] = (acc[curr.job_id] || 0) + 1;
+    const jobFrequency = appliedJobs.reduce((acc, { job_id }) => {
+      acc[job_id] = (acc[job_id] || 0) + 1;
       return acc;
     }, {});
 
-    const trendingJobIds = Object.keys(jobFrequency).filter(
-      (id) => jobFrequency[id] >= 2
-    );
+    const trendingJobIds = Object.keys(jobFrequency)
+      .filter((id) => jobFrequency[id] >= 2)
+      .slice(0, 6);
 
     const { data: jobs } = await supabase
       .from("employer_jobs")
       .select("*")
       .in("id", trendingJobIds);
-    setTrendingJobs(jobs || []);
+
+    const uniqueUids = [...new Set(jobs.map((job) => job.firebase_uid))];
+
+    const { data: profiles } = await supabase
+      .from("employer_profiles")
+      .select("firebase_uid, company_name")
+      .in("firebase_uid", uniqueUids);
+
+    const jobWithCompany = jobs.map((job) => {
+      const profile = profiles.find((p) => p.firebase_uid === job.firebase_uid);
+      return {
+        ...job,
+        company_name: profile?.company_name || "N/A",
+      };
+    });
+
+    setTrendingJobs(jobWithCompany);
   };
 
   const fetchInterviews = async () => {
@@ -162,13 +226,39 @@ export default function EmployerDashboard() {
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-r from-[#FFFAEC] to-[#FFD24C]">
-      <EmployerSidebar />
-      <div className="flex flex-col flex-1 min-h-screen">
+    <div className="flex h-screen">
+      <div className="hidden md:block">
+        <EmployerSidebar />
+      </div>
+
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        >
+          <div className="absolute left-0 top-0 bg-white w-64 h-full shadow-lg">
+            <EmployerSidebar />
+          </div>
+        </div>
+      )}
+
+      <div className="flex-1 flex flex-col">
+        <div className="flex justify-between items-center p-4 bg-gradient-to-r from-yellow-300 to-yellow-100 shadow-md md:hidden">
+          <Menu
+            className="w-6 h-6 text-[#333333]"
+            onClick={() => setIsSidebarOpen(true)}
+          />
+          <h2 className="text-lg font-bold text-[#333333]">
+            Employer Dashboard
+          </h2>
+          <div></div>
+        </div>
+
         <EmployerHeader />
-        <main className="p-6 flex-1 overflow-auto">
-          <h1 className="text-2xl font-bold text-center mb-6 text-[#333333] rounded-full border-2 border-neon px-4 py-2 w-fit mx-auto">
-            Let's Grow Your Hiring Journey 🚀
+
+        <main className="p-4 sm:p-6 bg-[#FFFAEC] flex-1 overflow-auto">
+          <h1 className="text-2xl md:text-3xl font-bold text-center mb-6 bg-gradient-to-r from-yellow-500 via-orange-500 to-pink-500 bg-clip-text text-transparent animate-pulse">
+            Let’s Grow Your Hiring Journey
           </h1>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -176,7 +266,6 @@ export default function EmployerDashboard() {
             <StatCard title="Applicants" value={counts.applicants} />
             <StatCard title="Interviews Scheduled" value={counts.interviews} />
           </div>
-
           <section className="bg-white p-4 rounded shadow mb-6 border-2 border-neon">
             <h2 className="text-xl font-semibold text-center mb-4">
               Platform Statistics
@@ -197,19 +286,19 @@ export default function EmployerDashboard() {
 
           <SectionCard title="Your Posted Jobs">
             {postedJobs.map((job) => (
-              <JobCard key={job.id} job={job} />
+              <JobCard key={job.id} job={job} companyName={job.company_name} />
             ))}
           </SectionCard>
 
           <SectionCard title="All Jobs">
             {allJobs.map((job) => (
-              <JobCard key={job.id} job={job} />
+              <JobCard key={job.id} job={job} companyName={job.company_name} />
             ))}
           </SectionCard>
 
           <SectionCard title="Trending Jobs">
             {trendingJobs.map((job) => (
-              <JobCard key={job.id} job={job} />
+              <JobCard key={job.id} job={job} companyName={job.company_name} />
             ))}
           </SectionCard>
 
@@ -233,7 +322,6 @@ export default function EmployerDashboard() {
               </div>
             ))}
           </SectionCard>
-
           <SectionCard title="NextTalent News">
             {newsFeed.map((news) => (
               <div
@@ -250,7 +338,6 @@ export default function EmployerDashboard() {
               </div>
             ))}
           </SectionCard>
-
           <SectionCard title="Reviews">
             {reviews.map((review) => (
               <div
@@ -290,7 +377,7 @@ function SectionCard({ title, children }) {
   );
 }
 
-function JobCard({ job }) {
+function JobCard({ job, companyName = "N/A" }) {
   return (
     <div className="bg-white p-4 rounded shadow border-2 border-neon">
       <img
@@ -300,10 +387,18 @@ function JobCard({ job }) {
       />
       <h3 className="font-bold">{job.title}</h3>
       <p className="text-sm">{job.description}</p>
-      <p className="text-xs mt-1">Location: {job.location}</p>
-      <p className="text-xs">Salary: {job.salary}</p>
+      <p className="text-xs">
+        <span className="font-bold">Company: </span>
+        {companyName}
+      </p>
+      <p className="text-xs">
+        <span className="font-bold">Location:</span> {job.location}
+      </p>
+      <p className="text-xs">
+        <span className="font-bold">Salary:</span> {job.salary}
+      </p>
       <p className="text-xs font-semibold text-black">
-        Status:{" "}
+        <span className="font-bold">Status:</span>{" "}
         <span
           className={`${
             job.status === "Approved"

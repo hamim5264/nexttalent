@@ -48,10 +48,11 @@ export default function ReviewScreen() {
   return (
     <div className="p-6 bg-[#FFFAEC] min-h-screen flex flex-col items-center">
       <div className="flex justify-center mt-4 mb-6">
-        <h1 className="text-2xl font-semibold text-[#333333] border-2 border-[#FFD24C] rounded-full px-5 py-1 shadow-[0_0_10px_#FFD24C]">
+        <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-[#333333] border-2 border-[#FFD24C] rounded-full px-4 py-1 shadow-[0_0_10px_#FFD24C] text-center">
           Share Your Feedback/Review
         </h1>
       </div>
+
       <p className="text-[#555555] mb-6">
         We value your feedback. Please share your experience with us.
       </p>

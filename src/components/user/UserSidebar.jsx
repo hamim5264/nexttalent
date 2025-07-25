@@ -35,22 +35,22 @@ export default function UserSidebar() {
   const profileName = profile?.name || "Update";
 
   return (
-    <div className="w-64 h-full bg-gradient-to-b from-yellow-300 via-white to-yellow-200 text-black flex flex-col shadow-xl">
+    <div className="w-full sm:w-64 h-full bg-gradient-to-b from-yellow-300 via-white to-yellow-200 text-black flex flex-col shadow-xl">
       <div
-        className="flex flex-col items-center justify-center p-6 border-b border-yellow-200 cursor-pointer"
+        className="flex flex-col items-center justify-center p-4 border-b border-yellow-200 cursor-pointer"
         onClick={() => navigate("/user/settings")}
       >
         <img
           src={profileImage}
           alt="User Profile"
-          className="w-20 h-20 rounded-full border-4 border-white shadow-lg mb-2 object-cover"
+          className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-4 border-white shadow-lg mb-2 object-cover"
         />
-        <h2 className="text-xl font-bold tracking-widest text-black text-center">
+        <h2 className="text-base sm:text-xl font-bold tracking-widest text-black text-center">
           {profileName}
         </h2>
       </div>
 
-      <nav className="flex-1 p-6 space-y-3">
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         <SidebarLink to="/user" label="Dashboard" />
         <SidebarLink to="/user/build-resume" label="Build Resume" />
         <SidebarLink to="/user/your-resume" label="Your Resume" />
@@ -61,6 +61,11 @@ export default function UserSidebar() {
           label="Interview Schedules"
         />
         <SidebarLink to="/user/applications" label="Applications" />
+        <SidebarLink
+          to="/user/rejected-suggestions"
+          label="Rejected Suggestions"
+        />
+
         <SidebarLink to="/user/settings" label="Settings" />
         <SidebarLink to="/user/review" label="Review" />
         <SidebarLink to="/user/about-us" label="About Us" />

@@ -15,7 +15,51 @@ export default function PostJob() {
     salary: "",
     imageUrl: "",
     description: "",
+    requiredSkills: [],
+    deadline: "",
   });
+  const skillOptions = [
+    "No skill required",
+    "Fresher can apply",
+    "JavaScript",
+    "Express.js",
+    "Dart",
+    "Ruby",
+    "Firbase",
+    " Tailwind CSS",
+    "Flutter",
+    "HTML",
+    "MERN Stack",
+    "C++",
+    "Java",
+    "C#",
+    "MongoDB",
+    "API Integration",
+    "Python",
+    "React",
+    "Node.js",
+    "SQL",
+    "Figma",
+    "Adobe XD",
+    "Prototyping",
+    "Design Systems",
+    "Cypress",
+    "Selenium",
+    "Postman",
+    "Test Cases",
+    "REST API",
+    "Communication",
+    "Teamwork",
+    "Graphic Design",
+    "Marketing",
+    "Sales",
+    "Nursing",
+    "Data Analysis",
+    "Project Management",
+    "AutoCAD",
+    "Electrical Engineering",
+    "Medical Knowledge",
+  ];
 
   const auth = getAuth();
   const user = auth.currentUser;
@@ -25,6 +69,15 @@ export default function PostJob() {
       ...form,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const handleSkillChange = (skill) => {
+    setForm((prev) => ({
+      ...prev,
+      requiredSkills: prev.requiredSkills.includes(skill)
+        ? prev.requiredSkills.filter((s) => s !== skill)
+        : [...prev.requiredSkills, skill],
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -45,6 +98,11 @@ export default function PostJob() {
           image_url: form.imageUrl,
           description: form.description,
           status: "Pending",
+          required_skills:
+            form.requiredSkills.length > 0
+              ? form.requiredSkills
+              : ["no skills provided from company"],
+          application_deadline: form.deadline || null,
         },
       ]);
 
@@ -71,6 +129,8 @@ export default function PostJob() {
         salary: "",
         imageUrl: "",
         description: "",
+        requiredSkills: [],
+        deadline: "",
       });
     } catch (err) {
       console.error("Unexpected error posting job:", err);
@@ -130,6 +190,38 @@ export default function PostJob() {
               placeholder="Enter job description"
               rows="4"
             ></textarea>
+          </div>
+
+          <div>
+            <label className="block text-[#333333] font-medium mb-1">
+              Required Skills
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {skillOptions.map((skill) => (
+                <label key={skill} className="text-sm flex items-center gap-1">
+                  <input
+                    type="checkbox"
+                    value={skill}
+                    checked={form.requiredSkills.includes(skill)}
+                    onChange={() => handleSkillChange(skill)}
+                  />
+                  {skill}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[#333333] font-medium mb-1">
+              Deadline (Last Date of Application)
+            </label>
+            <input
+              type="date"
+              name="deadline"
+              value={form.deadline}
+              onChange={handleChange}
+              className="w-full p-3 border rounded"
+            />
           </div>
 
           <button

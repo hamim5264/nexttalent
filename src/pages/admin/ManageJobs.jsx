@@ -9,6 +9,10 @@ import {
 export default function ManageJobs() {
   const [jobs, setJobs] = useState([]);
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [rejectReasons, setRejectReasons] = useState([]);
+  const [rejectComment, setRejectComment] = useState("");
+  const [selectedJob, setSelectedJob] = useState(null);
 
   useEffect(() => {
     fetchJobs();
@@ -68,16 +72,9 @@ export default function ManageJobs() {
       .eq("id", id);
 
     if (!error) {
-      // await notifySpecificUser(
-      //   jobData.firebase_uid,
-      //   `Job "${jobData.title}" ${newStatus}`,
-      //   `Admin has ${newStatus.toLowerCase()} your job titled "${
-      //     jobData.title
-      //   }".`
-      // );
       await notifySpecificUser(
         jobData.firebase_uid,
-        "employer", // ✅ role
+        "employer",
         `Job "${jobData.title}" ${newStatus}`,
         `Admin has ${newStatus.toLowerCase()} your job titled "${
           jobData.title
@@ -137,7 +134,6 @@ export default function ManageJobs() {
               key={job.id}
               className="bg-white p-4 rounded shadow border-l-4 border-[#FFD24C] hover:shadow-md transition"
             >
-              {/* Job Image */}
               {job.image_url && (
                 <img
                   src={job.image_url}
@@ -173,6 +169,28 @@ export default function ManageJobs() {
               <p className="text-[#555555] mb-1">
                 <strong>Description:</strong> {job.description}
               </p>
+              <p className="text-[#555555] mb-1">
+                <span className="font-bold">Skills:</span>{" "}
+                {job.required_skills?.length === 1 &&
+                job.required_skills[0] === "no skills provided from company" ? (
+                  <span className="text-red-500 uppercase">
+                    {job.required_skills[0]}
+                  </span>
+                ) : (
+                  job.required_skills?.join(", ")
+                )}
+              </p>
+
+              <p className="text-[#555555] mb-1">
+                <span className="font-bold">Deadline:</span>{" "}
+                {job.application_deadline ? (
+                  job.application_deadline
+                ) : (
+                  <span className="text-red-500 font-semibold">
+                    NOT PROVIDED
+                  </span>
+                )}
+              </p>
 
               {job.employer && (
                 <div className="mt-3 bg-gray-50 p-3 rounded">
@@ -204,12 +222,17 @@ export default function ManageJobs() {
                 >
                   Pending
                 </button>
+
                 <button
                   className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm"
-                  onClick={() => updateJobStatus(job.id, "Rejected")}
+                  onClick={() => {
+                    setSelectedJob(job);
+                    setShowRejectDialog(true);
+                  }}
                 >
                   Reject
                 </button>
+
                 <button
                   className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 text-sm"
                   onClick={() => setConfirmDelete(job.id)}
@@ -226,7 +249,6 @@ export default function ManageJobs() {
         </p>
       )}
 
-      {/* Delete Confirmation Modal */}
       {confirmDelete && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded shadow-xl text-center">
@@ -244,6 +266,109 @@ export default function ManageJobs() {
                 onClick={() => setConfirmDelete(null)}
               >
                 Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showRejectDialog && selectedJob && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="bg-white w-[90%] md:w-[500px] p-6 rounded shadow-xl space-y-4">
+            <h2 className="text-xl font-semibold text-center mb-2 text-[#333]">
+              Give Feedback to Employer
+            </h2>
+
+            <p className="text-[#333] font-medium">
+              Why are you rejecting this job?
+            </p>
+            <div className="space-y-2">
+              {[
+                "Incomplete job details",
+                "Invalid salary range",
+                "Missing image or branding",
+                "Poor grammar or tone",
+                "Others",
+              ].map((reason) => (
+                <label
+                  key={reason}
+                  className="flex items-center space-x-2 text-[#555]"
+                >
+                  <input
+                    type="checkbox"
+                    value={reason}
+                    checked={rejectReasons.includes(reason)}
+                    onChange={(e) => {
+                      const updated = e.target.checked
+                        ? [...rejectReasons, reason]
+                        : rejectReasons.filter((r) => r !== reason);
+                      setRejectReasons(updated);
+                    }}
+                  />
+                  <span>{reason}</span>
+                </label>
+              ))}
+            </div>
+
+            <textarea
+              placeholder="Write a comment (optional)"
+              value={rejectComment}
+              onChange={(e) => setRejectComment(e.target.value)}
+              className="w-full border border-gray-300 p-2 rounded"
+              rows={3}
+            ></textarea>
+
+            <div className="flex justify-between pt-4">
+              <button
+                onClick={() => setShowRejectDialog(false)}
+                className="bg-gray-300 text-[#333] px-4 py-2 rounded hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  if (rejectReasons.length === 0) {
+                    alert("Please select at least one reason.");
+                    return;
+                  }
+
+                  const { error: insertError } = await supabase
+                    .from("job_rejection_feedback")
+                    .insert([
+                      {
+                        job_id: selectedJob.id,
+                        employer_uid: selectedJob.firebase_uid,
+                        selected_reasons: rejectReasons,
+                        comment: rejectComment || null,
+                      },
+                    ]);
+
+                  if (!insertError) {
+                    await supabase
+                      .from("employer_jobs")
+                      .update({ status: "Rejected" })
+                      .eq("id", selectedJob.id);
+
+                    await notifySpecificUser(
+                      selectedJob.firebase_uid,
+                      "employer",
+                      `Job "${selectedJob.title}" Rejected`,
+                      `Admin has rejected your job titled "${selectedJob.title}" and provided feedback.`
+                    );
+
+                    fetchJobs();
+                    setShowRejectDialog(false);
+                    setRejectReasons([]);
+                    setRejectComment("");
+                    setSelectedJob(null);
+                  } else {
+                    console.error("Error saving feedback:", insertError);
+                    alert("Failed to reject job. Try again.");
+                  }
+                }}
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+              >
+                Submit & Reject
               </button>
             </div>
           </div>

@@ -119,6 +119,24 @@ export default function PostedJobsScreen() {
                 />
                 <h2 className="text-lg font-bold">{job.title}</h2>
                 <p className="text-[#555555]">{job.description}</p>
+
+                <p className="text-sm">
+                  <span className="font-medium text-black">
+                    Required Skills:
+                  </span>{" "}
+                  {Array.isArray(job.required_skills) &&
+                  job.required_skills.length > 0
+                    ? job.required_skills.join(", ")
+                    : "No skills provided from company"}
+                </p>
+
+                <p className="text-sm">
+                  <span className="font-medium text-black">Deadline:</span>{" "}
+                  {job.application_deadline
+                    ? new Date(job.application_deadline).toLocaleDateString()
+                    : "No deadline provided from the company"}
+                </p>
+
                 <p className="text-sm mt-1">
                   <span className="font-medium text-black">Status:</span>{" "}
                   <span

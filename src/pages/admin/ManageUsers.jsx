@@ -46,7 +46,6 @@ export default function ManageUsers() {
         </h1>
       </div>
 
-      {/* Search bar */}
       <div className="flex justify-center mb-8">
         <input
           type="text"
@@ -74,17 +73,24 @@ export default function ManageUsers() {
             <p className="text-sm text-[#555555]">{user.email}</p>
             <p className="text-sm text-[#555555]">{user.phone}</p>
 
-            <button
-              onClick={() => setConfirmDelete(user.id)}
-              className="mt-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm"
-            >
-              Delete
-            </button>
+            <div className="mt-2 flex flex-col sm:flex-row sm:justify-start sm:space-x-4 w-full">
+              <button
+                onClick={() => setConfirmDelete(user.id)}
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 text-sm mb-2 sm:mb-0"
+              >
+                Delete
+              </button>
+              <button
+                onClick={() => navigate(`/resume/${user.firebase_uid}`)}
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-sm"
+              >
+                View Resume
+              </button>
+            </div>
           </div>
         ))}
       </div>
 
-      {/* Confirm delete modal */}
       {confirmDelete && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded shadow-xl text-center">

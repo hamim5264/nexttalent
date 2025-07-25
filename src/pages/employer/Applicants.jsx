@@ -11,6 +11,24 @@ export default function Applicants() {
   const [scheduledInterviews, setScheduledInterviews] = useState([]);
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
+  //new
+  const [showSuggestionModal, setShowSuggestionModal] = useState(false);
+  const [currentRejectedApplicant, setCurrentRejectedApplicant] =
+    useState(null);
+  const [suggestionForm, setSuggestionForm] = useState({
+    questions: {},
+    comment: "",
+    videoLink: "",
+  });
+
+  const suggestionQuestions = [
+    "Communication Skill",
+    "Technical Skill",
+    "Presentation Skill",
+    "Professional Experience",
+    "Resume Quality",
+  ];
+
   const [scheduleData, setScheduleData] = useState({
     date: "",
     time: "",
@@ -58,12 +76,15 @@ export default function Applicants() {
   };
 
   const handleStatusChange = async (applicant, newStatus) => {
-    const { error } = await supabase
-      .from("user_applied_jobs")
-      .update({ status: newStatus })
-      .eq("id", applicant.id);
+    if (newStatus === "Rejected") {
+      setCurrentRejectedApplicant(applicant);
+      setShowSuggestionModal(true);
+    } else {
+      await supabase
+        .from("user_applied_jobs")
+        .update({ status: newStatus })
+        .eq("id", applicant.id);
 
-    if (!error) {
       await notifySpecificUser(
         applicant.firebase_uid,
         "user",
@@ -72,8 +93,55 @@ export default function Applicants() {
       );
 
       fetchApplicants();
-    } else {
-      console.error("Error updating applicant status:", error);
+    }
+  };
+
+  const submitSuggestion = async () => {
+    try {
+      const employerProfile = await supabase
+        .from("employer_profiles")
+        .select("company_name")
+        .eq(
+          "firebase_uid",
+          currentRejectedApplicant.employer_jobs?.firebase_uid
+        )
+        .single();
+
+      const companyName =
+        employerProfile.data?.company_name || "Unknown Company";
+
+      await supabase.from("rejected_suggestions").insert([
+        {
+          user_uid: currentRejectedApplicant.firebase_uid,
+          job_title: currentRejectedApplicant.employer_jobs?.title,
+          company_name: companyName,
+          questions_answers: suggestionForm.questions,
+          comment: suggestionForm.comment,
+          video_link: suggestionForm.videoLink,
+        },
+      ]);
+
+      await supabase
+        .from("user_applied_jobs")
+        .update({ status: "Rejected" })
+        .eq("id", currentRejectedApplicant.id);
+
+      await notifySpecificUser(
+        currentRejectedApplicant.firebase_uid,
+        "user",
+        "Application Rejected",
+        `Your application for "${currentRejectedApplicant.employer_jobs?.title}" was rejected. Check suggestions for improvement!`
+      );
+
+      alert("Suggestion submitted & notification sent!");
+
+      setShowSuggestionModal(false);
+      setCurrentRejectedApplicant(null);
+      setSuggestionForm({ questions: {}, comment: "", videoLink: "" });
+      fetchApplicants();
+    } catch (err) {
+      console.error("Error submitting suggestion:", err);
+      alert("Failed to submit suggestion.");
     }
   };
 
@@ -177,7 +245,7 @@ export default function Applicants() {
               </span>
             </p>
 
-            <div className="space-x-2 mt-4">
+            <div className="flex flex-wrap gap-2 mt-4">
               <a
                 href={app.resume_link}
                 target="_blank"
@@ -188,15 +256,27 @@ export default function Applicants() {
               </a>
 
               <button
-                onClick={() =>
-                  handleStatusChange(
-                    app,
-                    app.status === "Approved" ? "Rejected" : "Approved"
-                  )
-                }
-                className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-sm"
+                onClick={() => handleStatusChange(app, "Approved")}
+                disabled={app.status === "Approved"}
+                className={`${
+                  app.status === "Approved"
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-green-500 hover:bg-green-600"
+                } text-white px-3 py-1 rounded text-sm`}
               >
-                {app.status === "Approved" ? "Reject" : "Approve"}
+                Approve
+              </button>
+
+              <button
+                onClick={() => handleStatusChange(app, "Rejected")}
+                disabled={app.status === "Rejected"}
+                className={`${
+                  app.status === "Rejected"
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-red-500 hover:bg-red-600"
+                } text-white px-3 py-1 rounded text-sm`}
+              >
+                Reject
               </button>
 
               <button
@@ -265,6 +345,84 @@ export default function Applicants() {
               <button
                 onClick={() => setShowScheduleModal(false)}
                 className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showSuggestionModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-xl max-w-md w-full space-y-4">
+            <h2 className="text-xl font-bold mb-2">Send Suggestion</h2>
+
+            {suggestionQuestions.map((question, idx) => (
+              <div key={idx}>
+                <p className="text-sm font-medium">{question}</p>
+                <div className="flex gap-2 mt-1">
+                  {["Poor", "Average", "Good", "Excellent"].map((option) => (
+                    <label
+                      key={option}
+                      className="text-xs flex items-center space-x-1"
+                    >
+                      <input
+                        type="radio"
+                        name={`question-${idx}`}
+                        value={option}
+                        onChange={() =>
+                          setSuggestionForm((prev) => ({
+                            ...prev,
+                            questions: {
+                              ...prev.questions,
+                              [question]: option,
+                            },
+                          }))
+                        }
+                      />
+                      <span>{option}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            <textarea
+              placeholder="Leave a comment or send a video link"
+              className="w-full border rounded p-2 mt-2"
+              value={suggestionForm.comment}
+              onChange={(e) =>
+                setSuggestionForm({
+                  ...suggestionForm,
+                  comment: e.target.value,
+                })
+              }
+            />
+
+            <input
+              type="text"
+              placeholder="Optional Video Link"
+              className="w-full border rounded p-2 mt-2"
+              value={suggestionForm.videoLink}
+              onChange={(e) =>
+                setSuggestionForm({
+                  ...suggestionForm,
+                  videoLink: e.target.value,
+                })
+              }
+            />
+
+            <div className="flex justify-end space-x-3 mt-4">
+              <button
+                className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-sm"
+                onClick={submitSuggestion}
+              >
+                Submit
+              </button>
+              <button
+                className="bg-gray-300 px-3 py-1 rounded hover:bg-gray-400 text-sm"
+                onClick={() => setShowSuggestionModal(false)}
               >
                 Cancel
               </button>

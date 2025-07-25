@@ -105,23 +105,24 @@ export default function ManageNewsFeed() {
         {feeds.map((feed) => (
           <div
             key={feed.id}
-            className="bg-white p-4 rounded shadow flex items-center justify-between border-l-4 border-[#FFD24C] hover:shadow-md transition"
+            className="bg-white p-4 rounded shadow border-l-4 border-[#FFD24C] hover:shadow-md transition flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
           >
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center gap-4 w-full">
               <img
                 src={feed.image_url}
                 alt={feed.title}
-                className="w-20 h-20 object-cover rounded"
+                className="w-full sm:w-20 h-32 sm:h-20 object-cover rounded"
               />
-              <div>
+              <div className="flex-1">
                 <h2 className="text-lg font-semibold text-[#333333]">
                   {feed.title}
                 </h2>
                 <p className="text-[#555555] text-sm">{feed.description}</p>
               </div>
             </div>
+
             <button
-              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition self-end sm:self-auto"
               onClick={() => setConfirmDelete(feed.id)}
             >
               Delete
@@ -130,7 +131,6 @@ export default function ManageNewsFeed() {
         ))}
       </div>
 
-      {/* Confirm Delete Dialog */}
       {confirmDelete !== null && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded shadow-xl text-center">
@@ -154,7 +154,6 @@ export default function ManageNewsFeed() {
         </div>
       )}
 
-      {/* Add News Dialog */}
       {showAddDialog && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded shadow-xl max-w-md w-full">
