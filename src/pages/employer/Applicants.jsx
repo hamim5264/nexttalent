@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import supabase from "../../supabaseClient";
 import { getAuth } from "firebase/auth";
 import { notifySpecificUser } from "../../services/notificationService";
@@ -6,12 +7,13 @@ import { notifySpecificUser } from "../../services/notificationService";
 export default function Applicants() {
   const auth = getAuth();
   const user = auth.currentUser;
+  const navigate = useNavigate();
 
   const [applicants, setApplicants] = useState([]);
   const [scheduledInterviews, setScheduledInterviews] = useState([]);
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
-  //new
+
   const [showSuggestionModal, setShowSuggestionModal] = useState(false);
   const [currentRejectedApplicant, setCurrentRejectedApplicant] =
     useState(null);
